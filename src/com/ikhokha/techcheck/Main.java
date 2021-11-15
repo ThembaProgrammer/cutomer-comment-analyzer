@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
 
@@ -12,14 +15,16 @@ public class Main {
 		final ConcurrentMap<String, Integer> totalResults = new ConcurrentHashMap<>();
 		final File docPath = new File("docs");
 		final File[] commentFiles = docPath.listFiles((d, n) -> n.endsWith(".txt"));
-		final CountDownLatch countDownLatch = new CountDownLatch(commentFiles.length);
+
+		final ExecutorService executor = Executors.newFixedThreadPool(10);
 
 		for (final File commentFile : commentFiles) {
-			new Thread(new CommentAnalyzer(commentFile,totalResults, countDownLatch)).start();
+			executor.submit(new CommentAnalyzer(commentFile,totalResults));
 		}
 
 		try {
-			countDownLatch.await();
+			executor.shutdown();
+			executor.awaitTermination(2, TimeUnit.MINUTES);
 		} catch (Exception e){
 			e.printStackTrace();
 			throw new RuntimeException(e.getCause());

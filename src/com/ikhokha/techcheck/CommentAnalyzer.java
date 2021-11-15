@@ -24,16 +24,10 @@ public class CommentAnalyzer implements Runnable {
 
     private File file;
     private ConcurrentMap<String, Integer> totalResults;
-
-    // Concurrent execution count down
-    private CountDownLatch countDownLatch;
 	
-	public CommentAnalyzer(final File file,
-            final ConcurrentMap<String, Integer> totalResults,
-            final CountDownLatch countDownLatch) {
+	public CommentAnalyzer(final File file, final ConcurrentMap<String, Integer> totalResults) {
 		this.file = file;
 		this.totalResults = totalResults;
-		this.countDownLatch = countDownLatch;
 	}
 
 	@Override
@@ -65,9 +59,6 @@ public class CommentAnalyzer implements Runnable {
 		synchronized (totalResults){
 		    addReportResults(resultsMap, totalResults);
         }
-
-		countDownLatch.countDown();
-
 	}
 
     /**
